@@ -1,0 +1,40 @@
+??QUERIES
+SELECT country.Name,city.Name from country JOIN city on country.Code=city.CountryCode join countrylanguage on country.Code=countrylanguage.CountryCode WHERE city.Population>10000 and countrylanguage.IsOfficial='T';
+
+
+select country.name,city.name,countrylanguage.Language,countrylanguage.Percentage from country join city on country.Code=city.CountryCode join countrylanguage on country.Code = countrylanguage.CountryCode where city.Population=(select max(population) from city where country.Code=city.CountryCode) and countrylanguage.Percentage=(select max(countrylanguage.Percentage) from countrylanguage  where country.Code=countrylanguage.CountryCode) and countrylanguage.Percentage!=0;
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+CREATE DEFINER=`root`@`localhost` PROCEDURE `get_cities`(IN lang VARCHAR(30))                                                                                                   ->BEGIN 
+->select country.Name,countrylanguage.CountryCode,countrylanguage.Percentage from countrylanguage join country on countrylanguage.CountryCode = country.Code where countrylanguage.Language = lang; 
+->END //
+
+CREATE PROCEDURE details(IN form VARCHAR(52),OUT cname VARCHAR(52))                                                  
+-> BEGIN
+-> SELECT count(Name) INTO cname FROM country WHERE GovernmentForm = form;                                              
+-> end // 
+
+CREATE PROCEDURE get_count(IN conti varchar(30),out countcountry INT)
+    -> begin
+    -> select count(Name) into countcountry from country where Continent = conti;
+    -> end //
+
+CREATE DEFINER=`root`@`localhost` PROCEDURE `get_names_in_continent`(IN `Surf_Area` INT, IN `Poplt` INT, IN `Conti` VARCHAR(255)) NOT DETERMINISTIC CONTAINS SQL SQL SECURITY DEFINER BEGIN 
+SELECT Name,Region,LocalName,GovernmentForm from country where Population > Poplt and SurfaceArea >Surf_Area and Continent = Conti; 
+END
+
+
+CREATE DEFINER=`root`@`localhost` PROCEDURE `get_avg_lang`(IN `lang` VARCHAR(53), OUT `avg1` FLOAT, IN `conti` VARCHAR(255)) NOT DETERMINISTIC CONTAINS SQL SQL SECURITY DEFINER begin 
+select avg(cl.Percentage) into avg1 from countrylanguage as cl join country on  country.Code = cl.CountryCode where Language = lang and country.Continent = conti;
+end
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+create index hashable on city(Name) using btree;
+
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+create view country_with_lang as select CountryCode,c.Name,c.Continent,Language,IsOfficial,Percentage from countrylanguage left join country as c on countrylanguage.CountryCode = c.Code ;	
+
+create view country_with_city as select city.CountryCode,c.Name,city.Population,c.GovernmentForm,LifeExpectancy from city left join country as c on city.CountryCode = c.Code;
+
+select distinct(cc.Countrycode),cl.Name,cl.Continent,cl.IsOfficial,cc.GovernmentForm,cl.Language,cl.Percentage from country_with_city as cc join country_with_lang as cl on cc.CountryCode = cl.CountryCode;  

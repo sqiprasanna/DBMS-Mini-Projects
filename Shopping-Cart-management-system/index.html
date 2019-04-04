@@ -1,0 +1,165 @@
+
+<!DOCTYPE HTML>  
+<html>
+<head>
+<style>
+.error {color: #FF0000;}
+body{
+	background-color:aqua;
+}
+</style>
+</head>
+<body> 
+		<?php
+		if ($_SERVER["REQUEST_METHOD"] == "POST") 
+		{
+			  
+			if(empty($_POST["Title"]))
+			{
+				   $TitleErr = " Title is required ";    
+			}
+			else
+			{
+				
+				$Title = test_input($_POST["Title"]);
+			// check if name only contains letters and whitespace
+					if (!preg_match("/^[a-zA-Z ]*$/",$Title))
+				 {
+					  $TitleErr = "Only letters and white space allowed";	
+				 }
+				
+			}
+			if (empty($_POST["Id"]))
+			{
+			   $IdErr = "Id is required";
+			 } 
+		   else
+			
+		   {
+			   $Id = test_input($_POST["Id"]);
+		   // check if name only contains letters and whitespace
+				   if (!preg_match("/^[a-zA-Z ]*$/",$Id))
+				{
+					 $IdErr = "Only letters and white space allowed";	
+				}
+				}
+		}
+		
+		function test_input($data)
+		 {
+		  $data = trim($data);
+		  $data = stripslashes($data);
+		  $data = htmlspecialchars($data);
+		   return $data;
+	}
+	?>
+	<h2>Shopping Cart</h2>
+	<p><span class="error">* Required field.</span></p>
+	<form method="post" action="delete_cat.php">  
+	  <h3>CATEGORIES:-</h3><br> 
+	  Title:-<input type="text" name="Title" value="">
+	  <span class="error">* </span>
+	  Id :-<input type="text" name="Id" value="">
+	  <span class="error">* </span><br>
+	  
+		<input type="submit" name="submit" value="Add Categories">			
+		<input type="submit" name="submit" value="Remove Categories">
+		<input type="submit" name="submit" value="Update Categories">    
+	</form>
+	  <br><br>
+	<form method="post" action="products.php">  
+		<h3>PRODUCTS:-</h3><br>
+		pid:- <input type="text" name="pid" value="">
+			<span class="error">* </span>
+		ip: <input type="text" name="ip" value="">
+			<span class="error">* </span>
+		qty: <input type="text" name="qty" value="">
+			<span class="error">* </span><br>
+	<input type="submit" name="submit" value="Add to cart">  
+		
+	<input type="submit" name="submit" value="Remove from cart">
+	<input type="submit" name="submit" value="Get Cart"> 
+	<input type="submit" name="submit" value="Update">  
+	
+	</form>
+	
+	<br><br>
+	<form method="post" action="orders.php">  
+		<h3>ORDERS:-</h3><br>
+		orderid :<input type="text" name="orderid" value="">
+			<span class="error">* </span>
+		pid: <input type="text" name="pid" value="">
+			<span class="error">* </span>
+		qty: <input type="text" name="qty" value="">
+			<span class="error">* </span>
+		invoice_no :<input type="text" name="invoice" value="">
+			<span class="error">* </span>
+		status: <input type="text" name="status" value="">		
+			<span class="error">* </span><br>
+		<input type="submit" name="submit" value="Update Orders">
+		<input type="submit" name="submit" value="Get Orders">
+	<br><br> 
+	</form>
+	
+	<form method="post" action="triggers.php">  
+			<h3>Customers:-(Using triggers)</h3><br> 
+			Customer_name:-<input type="text" name="c_name" value="">
+			<span class="error">* </span>
+			Customer_Id :-<input type="text" name="c_id" value="">
+			<span class="error">* </span><br>
+			<input type="submit" name="submit" value="Get Customers Data">
+			<input type="submit" name="submit" value="Update CustomerId">    
+   </form>
+
+   <!--form method="post" action="triggers2pay.php">  
+	<h3>Payments:-(Using triggers)</h3><br> 
+	Amount<input type="text" name="amount" value="">
+	<span class="error">* </span>
+	Customer_id<input type="text" name="c_id" value="">
+	<span class="error">* </span>
+	Product_id<input type="text" name="p_id" value="">
+	<span class="error">* </span>
+	transaction_id<input type="text" name="trx_id" value="">
+	<span class="error">* </span>
+	Quantity<input type="text" name="qty" value="">
+	<span class="error">* </span><br>
+	Invoice_no<input type="text" name="invoice" value="">
+	<span class="error">* </span>
+	Status<input type="text" name="status" value="">
+	<span class="error">* </span>
+	<br>
+
+	<input type="submit" name="submit" value="Insert Payments">
+</form-->
+<form method="post" action="triggers3brand.php">  
+	<h3>Brands:-(Using triggers)</h3><br> 
+	category_id:-<input type="text" name="cat_id" value="">
+	<span class="error">* </span>
+	category_title :-<input type="text" name="cat_title" value="">
+	<span class="error">* </span><br>
+	
+	<input type="submit" name="submit" value="Update Brands">   
+</form>
+
+<br><br>
+	<form method="post" action="trigger_order.php">  
+		<h3>ORDERS:-</h3><br>
+		pid: <input type="text" name="pid" value="">
+			<span class="error">* </span>
+		qty: <input type="text" name="qty" value="">
+			<span class="error">* </span>
+		invoice_no :<input type="text" name="invoice" value="">
+			<span class="error">* </span>
+		status: <input type="text" name="status" value="">		
+			<span class="error">* </span><br>
+		<input type="submit" name="submit" value="Insert orders">
+	<br><br> 
+	</form>
+	<br><br>
+	<h3>VIEWS</h3>
+	<form method="post" action="views.php">
+		<input type="submit" name ="submit" value ="view payment amount > 500">
+		<input type="submit" name ="submit" value ="view categories">	
+	</form>
+</body>
+</html>

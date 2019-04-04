@@ -1,0 +1,53 @@
+Trigger 1
+1.create trigger n after update on categories
+     for each row
+     begin
+    update orders set p_id=6,c_id=new.cat_id,qty=4,invoice_no=4554544,status='completed',order_date='2014-09-09';
+2.update categories set cat_id=8 where cat_title='clothes';
+3.select * from orders;
+
+
+Trigger 2
+1.create trigger r before insert on payments
+    for each row
+     begin
+     insert into orders(p_id,c_id,qty,invoice_no,status,order_date) values(new.product_id,new.customer_id,7,3443222,'completed','2014-08-09');
+2.insert into payments(amount,customer_id,product_id,trx_id,currency,payment_date)values(340,7,5,'32JSDJDSJKS','USD','2015-09-08');
+3.select * from payments;
+
+Trigger 3
+1.create trigger y before update on brands
+    for each row
+    begin
+    if new.brand_title='xyz' then
+    set new.brand_title='abc';
+    end if;
+2.update brands set brand_title='xyz' where brand_id=8;
+3.select * from brands;
+
+Trigger 4
+
+1.create trigger t after insert on orders 
+  for each row
+  begin
+  insert into cart(p_id,ip_add,qty) values(new.p_id,'8801',new.qty);
+2.insert into orders(order_id,p_id,c_id,qty,invoice_no,status,order_date) values(13,10,6,3,3478222,'completed','2014-09-09');
+3.select * from cart
+
+
+
+views
+
+
+1.create view views_order as select order_id,invoice_no,order_date from orders;
+2.select * from views_order;
+////////////////////////////////////////////////////////////////////////////////////////
+
+1.create view  payments_view as select payment_id,trx_id from payments;
+2.select * from payments_view;
+$pid= isset($_POST['pid'])?$_POST['pid']:0;
+$cid= isset($_POST['cid'])?$_POST['cid']:0;
+$qty = isset($_POST['qty'])?$_POST['qty']:0;
+$invoice = isset($_POST['invoice'])?$_POST['invoice']:0;
+$status = isset($_POST['status'])?$_POST['status']:NULL;
+$date = isset($_POST['date'])?$_POST['date']:NULL

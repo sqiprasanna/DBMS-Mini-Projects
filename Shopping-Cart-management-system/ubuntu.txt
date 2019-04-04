@@ -1,0 +1,1118 @@
+Enter password: ***********
+Welcome to the MySQL monitor.  Commands end with ; or \g.
+Your MySQL connection id is 5
+Server version: 5.5.16 MySQL Community Server (GPL)
+
+Copyright (c) 2000, 2011, Oracle and/or its affiliates. All rights reserved.
+
+Oracle is a registered trademark of Oracle Corporation and/or its
+affiliates. Other names may be trademarks of their respective
+owners.
+
+Type 'help;' or '\h' for help. Type '\c' to clear the current input statement.
+
+mysql> use shoppingcart;
+Database changed
+mysql> select * from orders;
++----------+------+------+-----+------------+-------------+------------+
+| order_id | p_id | c_id | qty | invoice_no | status      | order_date |
++----------+------+------+-----+------------+-------------+------------+
+|        4 |    7 |    6 |   3 |    3427322 | completed   | 2014-09-09 |
+|        6 |    6 |    5 |   3 |  481994459 | Completed   | 2014-07-21 |
+|        7 |    9 |    0 |   1 | 1545302558 | completed   | 2014-07-23 |
+|        8 |    5 |    0 |   2 |  705705316 | in Progress | 2014-08-08 |
+|        9 |    7 |    6 |   1 | 1935681132 | in Progress | 2014-08-08 |
+|       10 |    9 |    6 |   3 | 1817786416 | completed   | 2014-08-08 |
+|       11 |    5 |    6 |   2 |  423122154 | in Progress | 2014-08-08 |
+|       12 |    8 |    6 |   4 |  496641685 | in Progress | 2014-08-08 |
+|       13 |   10 |    6 |   3 |    3427322 | completed   | 2014-09-09 |
++----------+------+------+-----+------------+-------------+------------+
+9 rows in set (0.01 sec)
+
+mysql> select * from cart;
++------+--------+-----+
+| p_id | ip_add | qty |
++------+--------+-----+
+|    5 | 8080   |   3 |
+|    7 | 8081   |   5 |
+|   10 | 8801   |   3 |
+|   13 | 8909   |  -3 |
++------+--------+-----+
+4 rows in set (0.00 sec)
+
+mysql> delete * from cart where p_id=13;
+ERROR 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '* from cart where p_id=13' at line 1
+mysql> delete from cart where p_id=13;
+Query OK, 1 row affected (0.05 sec)
+
+mysql> select * from cart;
++------+--------+-----+
+| p_id | ip_add | qty |
++------+--------+-----+
+|    5 | 8080   |   3 |
+|    7 | 8081   |   5 |
+|   10 | 8801   |   3 |
++------+--------+-----+
+3 rows in set (0.00 sec)
+
+mysql> delimiter $$
+mysql> create trigger t before update on cart
+    -> for each row
+    -> begin
+    ->  if new.qty>100 then
+    ->          set new.qty=100;
+    -> end if;
+    -> end;
+    -> $$
+ERROR 1235 (42000): This version of MySQL doesn't yet support 'multiple triggers with the same action time and event for one table'
+mysql> show triggers;
+    -> delimiter $$
++---------+--------+-------+----------------------------------------------------+--------+---------+----------------------------------------------------------------+----------------+----------------------+----------------------+--------------------+
+| Trigger | Event  | Table | Statement                                          | Timing | Created | sql_mode                                                       | Definer        | character_set_client | collation_connection | Database Collation |
++---------+--------+-------+----------------------------------------------------+--------+---------+----------------------------------------------------------------+----------------+----------------------+----------------------+--------------------+
+| u       | UPDATE | cart  | begin
+if new.qty<0 then
+set new.qty=0;
+end if;
+end | BEFORE | NULL    | STRICT_TRANS_TABLES,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION | root@localhost | latin1               | latin1_swedish_ci    | latin1_swedish_ci  |
++---------+--------+-------+----------------------------------------------------+--------+---------+----------------------------------------------------------------+----------------+----------------------+----------------------+--------------------+
+1 row in set (0.05 sec)
+
+ERROR 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'delimiter' at line 1
+mysql> delimiter $$
+mysql> delimiter ;
+mysql> select * from orders;
++----------+------+------+-----+------------+-------------+------------+
+| order_id | p_id | c_id | qty | invoice_no | status      | order_date |
++----------+------+------+-----+------------+-------------+------------+
+|        4 |    7 |    6 |   3 |    3427322 | completed   | 2014-09-09 |
+|        6 |    6 |    5 |   3 |  481994459 | Completed   | 2014-07-21 |
+|        7 |    9 |    0 |   1 | 1545302558 | completed   | 2014-07-23 |
+|        8 |    5 |    0 |   2 |  705705316 | in Progress | 2014-08-08 |
+|        9 |    7 |    6 |   1 | 1935681132 | in Progress | 2014-08-08 |
+|       10 |    9 |    6 |   3 | 1817786416 | completed   | 2014-08-08 |
+|       11 |    5 |    6 |   2 |  423122154 | in Progress | 2014-08-08 |
+|       12 |    8 |    6 |   4 |  496641685 | in Progress | 2014-08-08 |
+|       13 |   10 |    6 |   3 |    3427322 | completed   | 2014-09-09 |
++----------+------+------+-----+------------+-------------+------------+
+9 rows in set (0.00 sec)
+
+mysql> select * from payments;
++------------+--------+-------------+------------+-------------------+----------+--------------+
+| payment_id | amount | customer_id | product_id | trx_id            | currency | payment_date |
++------------+--------+-------------+------------+-------------------+----------+--------------+
+|          1 |    800 |           5 |          6 | 31B07494JS505133P | USD      | 0000-00-00   |
+|          2 |    500 |           5 |          9 | 18747053K31546734 | USD      | 0000-00-00   |
+|          3 |   1000 |           5 |          9 | 183154524M7953521 | USD      | 0000-00-00   |
+|          4 |    900 |           5 |          5 | 8L053110TE658224T | USD      | 2014-07-21   |
+|          5 |    450 |           5 |          8 | 42M62596JN658381G | USD      | 2014-07-21   |
+|          6 |    600 |           5 |          6 | 1FC71986FP579232R | USD      | 2014-07-21   |
+|          7 |    500 |           0 |          9 | 0AH67056C64289013 | USD      | 2014-07-23   |
+|          8 |   1800 |           0 |          5 | 1F431738AY795223E | USD      | 2014-08-08   |
+|          9 |    250 |           6 |          7 | 3G918931JL634141Y | USD      | 2014-08-08   |
+|         10 |   1500 |           6 |          9 | 0BF7586175203573G | USD      | 2014-08-08   |
+|         11 |   1800 |           6 |          5 | 7RS823437E828061K | USD      | 2014-08-08   |
+|         12 |   1800 |           6 |          8 | 84J65197FN011600G | USD      | 2014-08-08   |
++------------+--------+-------------+------------+-------------------+----------+--------------+
+12 rows in set (0.01 sec)
+
+mysql> delimiter $$
+mysql> create trigger y before update on amount
+    -> for each row
+    -> begin
+    -> if new.amount<100 then
+    ->  set new.amount=0;
+    -> end if;
+    -> end $$
+ERROR 1146 (42S02): Table 'shoppingcart.amount' doesn't exist
+mysql> delimiter ;
+mysql> show triggers;
++---------+--------+-------+----------------------------------------------------+--------+---------+----------------------------------------------------------------+----------------+----------------------+----------------------+--------------------+
+| Trigger | Event  | Table | Statement                                          | Timing | Created | sql_mode                                                       | Definer        | character_set_client | collation_connection | Database Collation |
++---------+--------+-------+----------------------------------------------------+--------+---------+----------------------------------------------------------------+----------------+----------------------+----------------------+--------------------+
+| u       | UPDATE | cart  | begin
+if new.qty<0 then
+set new.qty=0;
+end if;
+end | BEFORE | NULL    | STRICT_TRANS_TABLES,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION | root@localhost | latin1               | latin1_swedish_ci    | latin1_swedish_ci  |
++---------+--------+-------+----------------------------------------------------+--------+---------+----------------------------------------------------------------+----------------+----------------------+----------------------+--------------------+
+1 row in set (0.02 sec)
+
+mysql> delimiter $$
+mysql> create trigger y before update on payments
+    -> for each row
+    -> begin
+    -> if new.amount<100 then
+    ->  set new.amount=0;
+    -> end if;
+    -> end $$
+Query OK, 0 rows affected (0.09 sec)
+
+mysql> delimiter ;
+mysql> select * from payments;
++------------+--------+-------------+------------+-------------------+----------+--------------+
+| payment_id | amount | customer_id | product_id | trx_id            | currency | payment_date |
++------------+--------+-------------+------------+-------------------+----------+--------------+
+|          1 |    800 |           5 |          6 | 31B07494JS505133P | USD      | 0000-00-00   |
+|          2 |    500 |           5 |          9 | 18747053K31546734 | USD      | 0000-00-00   |
+|          3 |   1000 |           5 |          9 | 183154524M7953521 | USD      | 0000-00-00   |
+|          4 |    900 |           5 |          5 | 8L053110TE658224T | USD      | 2014-07-21   |
+|          5 |    450 |           5 |          8 | 42M62596JN658381G | USD      | 2014-07-21   |
+|          6 |    600 |           5 |          6 | 1FC71986FP579232R | USD      | 2014-07-21   |
+|          7 |    500 |           0 |          9 | 0AH67056C64289013 | USD      | 2014-07-23   |
+|          8 |   1800 |           0 |          5 | 1F431738AY795223E | USD      | 2014-08-08   |
+|          9 |    250 |           6 |          7 | 3G918931JL634141Y | USD      | 2014-08-08   |
+|         10 |   1500 |           6 |          9 | 0BF7586175203573G | USD      | 2014-08-08   |
+|         11 |   1800 |           6 |          5 | 7RS823437E828061K | USD      | 2014-08-08   |
+|         12 |   1800 |           6 |          8 | 84J65197FN011600G | USD      | 2014-08-08   |
++------------+--------+-------------+------------+-------------------+----------+--------------+
+12 rows in set (0.00 sec)
+
+mysql> insert into payments(payment_id,amount,customer-id,product_id,trx_id,currency,payment_date)values(13,36,5,7,'QWQ3222R4EDSS','USD',2014-09-09);
+ERROR 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '-id,product_id,trx_id,currency,payment_date)values(13,36,5,7,'QWQ3222R4EDSS','US' at line 1
+mysql> insert into payments(payment_id,amount,customer_id,product_id,trx_id,currency,payment_date)values(13,36,5,7,'QWQ3222R4EDSS','USD',2014-09-09);
+ERROR 1292 (22007): Incorrect date value: '1996' for column 'payment_date' at row 1
+mysql> insert into payments(payment_id,amount,customer-id,product_id,trx_id,currency,payment_date)values(13,36,5,7,'QWQ3222R4EDSS','USD','2014-09-09');
+ERROR 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '-id,product_id,trx_id,currency,payment_date)values(13,36,5,7,'QWQ3222R4EDSS','US' at line 1
+mysql> insert into payments(payment_id,amount,customer_id,product_id,trx_id,currency,payment_date)values(13,36,5,7,'QWQ3222R4EDSS','USD','2014-09-09');
+Query OK, 1 row affected (0.00 sec)
+
+mysql> select * from payments;
++------------+--------+-------------+------------+-------------------+----------+--------------+
+| payment_id | amount | customer_id | product_id | trx_id            | currency | payment_date |
++------------+--------+-------------+------------+-------------------+----------+--------------+
+|          1 |    800 |           5 |          6 | 31B07494JS505133P | USD      | 0000-00-00   |
+|          2 |    500 |           5 |          9 | 18747053K31546734 | USD      | 0000-00-00   |
+|          3 |   1000 |           5 |          9 | 183154524M7953521 | USD      | 0000-00-00   |
+|          4 |    900 |           5 |          5 | 8L053110TE658224T | USD      | 2014-07-21   |
+|          5 |    450 |           5 |          8 | 42M62596JN658381G | USD      | 2014-07-21   |
+|          6 |    600 |           5 |          6 | 1FC71986FP579232R | USD      | 2014-07-21   |
+|          7 |    500 |           0 |          9 | 0AH67056C64289013 | USD      | 2014-07-23   |
+|          8 |   1800 |           0 |          5 | 1F431738AY795223E | USD      | 2014-08-08   |
+|          9 |    250 |           6 |          7 | 3G918931JL634141Y | USD      | 2014-08-08   |
+|         10 |   1500 |           6 |          9 | 0BF7586175203573G | USD      | 2014-08-08   |
+|         11 |   1800 |           6 |          5 | 7RS823437E828061K | USD      | 2014-08-08   |
+|         12 |   1800 |           6 |          8 | 84J65197FN011600G | USD      | 2014-08-08   |
+|         13 |     36 |           5 |          7 | QWQ3222R4EDSS     | USD      | 2014-09-09   |
++------------+--------+-------------+------------+-------------------+----------+--------------+
+13 rows in set (0.00 sec)
+
+mysql> show triggers;
++---------+--------+----------+--------------------------------------------------------------+--------+---------+----------------------------------------------------------------+----------------+----------------------+----------------------+--------------------+
+| Trigger | Event  | Table    | Statement                                                    | Timing | Created | sql_mode                                                       | Definer        | character_set_client | collation_connection | Database Collation |
++---------+--------+----------+--------------------------------------------------------------+--------+---------+----------------------------------------------------------------+----------------+----------------------+----------------------+--------------------+
+| u       | UPDATE | cart     | begin
+if new.qty<0 then
+set new.qty=0;
+end if;
+end           | BEFORE | NULL    | STRICT_TRANS_TABLES,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION | root@localhost | latin1               | latin1_swedish_ci    | latin1_swedish_ci  |
+| y       | UPDATE | payments | begin
+if new.amount<100 then
+        set new.amount=0;
+end if;
+end | BEFORE | NULL    | STRICT_TRANS_TABLES,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION | root@localhost | latin1               | latin1_swedish_ci    | latin1_swedish_ci  |
++---------+--------+----------+--------------------------------------------------------------+--------+---------+----------------------------------------------------------------+----------------+----------------------+----------------------+--------------------+
+2 rows in set (0.02 sec)
+
+mysql> drop trigger y;
+Query OK, 0 rows affected (0.01 sec)
+
+mysql> show triggers;
++---------+--------+-------+----------------------------------------------------+--------+---------+----------------------------------------------------------------+----------------+----------------------+----------------------+--------------------+
+| Trigger | Event  | Table | Statement                                          | Timing | Created | sql_mode                                                       | Definer        | character_set_client | collation_connection | Database Collation |
++---------+--------+-------+----------------------------------------------------+--------+---------+----------------------------------------------------------------+----------------+----------------------+----------------------+--------------------+
+| u       | UPDATE | cart  | begin
+if new.qty<0 then
+set new.qty=0;
+end if;
+end | BEFORE | NULL    | STRICT_TRANS_TABLES,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION | root@localhost | latin1               | latin1_swedish_ci    | latin1_swedish_ci  |
++---------+--------+-------+----------------------------------------------------+--------+---------+----------------------------------------------------------------+----------------+----------------------+----------------------+--------------------+
+1 row in set (0.06 sec)
+
+mysql> delimiter $$
+mysql> create trigger y before update on payments
+    -> for each row
+    -> begin
+    -> if new.amount<100 then
+    ->  set new.amount=50;
+    -> end if;
+    -> end $$
+Query OK, 0 rows affected (0.09 sec)
+
+mysql> delimiter ;
+mysql> insert into payments(payment_id,amount,customer-id,product_id,trx_id,currency,payment_date)values(14,36,5,7,'QWQ3222R4EDSS','USD','2014-09-09');
+ERROR 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '-id,product_id,trx_id,currency,payment_date)values(14,36,5,7,'QWQ3222R4EDSS','US' at line 1
+mysql> insert into payments(payment_id,amount,customer_id,product_id,trx_id,currency,payment_date)values(14,37,5,7,'QWQ3222R4EDSS','USD','2014-09-09');
+Query OK, 1 row affected (0.00 sec)
+
+mysql> select * from payments;
++------------+--------+-------------+------------+-------------------+----------+--------------+
+| payment_id | amount | customer_id | product_id | trx_id            | currency | payment_date |
++------------+--------+-------------+------------+-------------------+----------+--------------+
+|          1 |    800 |           5 |          6 | 31B07494JS505133P | USD      | 0000-00-00   |
+|          2 |    500 |           5 |          9 | 18747053K31546734 | USD      | 0000-00-00   |
+|          3 |   1000 |           5 |          9 | 183154524M7953521 | USD      | 0000-00-00   |
+|          4 |    900 |           5 |          5 | 8L053110TE658224T | USD      | 2014-07-21   |
+|          5 |    450 |           5 |          8 | 42M62596JN658381G | USD      | 2014-07-21   |
+|          6 |    600 |           5 |          6 | 1FC71986FP579232R | USD      | 2014-07-21   |
+|          7 |    500 |           0 |          9 | 0AH67056C64289013 | USD      | 2014-07-23   |
+|          8 |   1800 |           0 |          5 | 1F431738AY795223E | USD      | 2014-08-08   |
+|          9 |    250 |           6 |          7 | 3G918931JL634141Y | USD      | 2014-08-08   |
+|         10 |   1500 |           6 |          9 | 0BF7586175203573G | USD      | 2014-08-08   |
+|         11 |   1800 |           6 |          5 | 7RS823437E828061K | USD      | 2014-08-08   |
+|         12 |   1800 |           6 |          8 | 84J65197FN011600G | USD      | 2014-08-08   |
+|         13 |     36 |           5 |          7 | QWQ3222R4EDSS     | USD      | 2014-09-09   |
+|         14 |     37 |           5 |          7 | QWQ3222R4EDSS     | USD      | 2014-09-09   |
++------------+--------+-------------+------------+-------------------+----------+--------------+
+14 rows in set (0.00 sec)
+
+mysql> drop trigger y;
+Query OK, 0 rows affected (0.02 sec)
+
+mysql> select * from payments;
++------------+--------+-------------+------------+-------------------+----------+--------------+
+| payment_id | amount | customer_id | product_id | trx_id            | currency | payment_date |
++------------+--------+-------------+------------+-------------------+----------+--------------+
+|          1 |    800 |           5 |          6 | 31B07494JS505133P | USD      | 0000-00-00   |
+|          2 |    500 |           5 |          9 | 18747053K31546734 | USD      | 0000-00-00   |
+|          3 |   1000 |           5 |          9 | 183154524M7953521 | USD      | 0000-00-00   |
+|          4 |    900 |           5 |          5 | 8L053110TE658224T | USD      | 2014-07-21   |
+|          5 |    450 |           5 |          8 | 42M62596JN658381G | USD      | 2014-07-21   |
+|          6 |    600 |           5 |          6 | 1FC71986FP579232R | USD      | 2014-07-21   |
+|          7 |    500 |           0 |          9 | 0AH67056C64289013 | USD      | 2014-07-23   |
+|          8 |   1800 |           0 |          5 | 1F431738AY795223E | USD      | 2014-08-08   |
+|          9 |    250 |           6 |          7 | 3G918931JL634141Y | USD      | 2014-08-08   |
+|         10 |   1500 |           6 |          9 | 0BF7586175203573G | USD      | 2014-08-08   |
+|         11 |   1800 |           6 |          5 | 7RS823437E828061K | USD      | 2014-08-08   |
+|         12 |   1800 |           6 |          8 | 84J65197FN011600G | USD      | 2014-08-08   |
+|         13 |     36 |           5 |          7 | QWQ3222R4EDSS     | USD      | 2014-09-09   |
+|         14 |     37 |           5 |          7 | QWQ3222R4EDSS     | USD      | 2014-09-09   |
++------------+--------+-------------+------------+-------------------+----------+--------------+
+14 rows in set (0.00 sec)
+
+mysql> delimiter $$
+mysql> create trigger y before update on payments
+    -> for each row
+    -> begin
+    -> if new.amount<0 then
+    -> set new.amount=0;
+    -> elseif new.amount>1000 then
+    -> set new.amount=999;
+    -> end if;
+    -> end $$
+Query OK, 0 rows affected (0.11 sec)
+
+mysql> delimiter ;
+mysql> insert into payments(payment_id,amount,customer_id,product_id,trx_id,currency,payment_date)values(15,1500,5,7,'QWQ32R4EDSS','USD','2014-10-09');
+Query OK, 1 row affected (0.00 sec)
+
+mysql> select * from payments;
++------------+--------+-------------+------------+-------------------+----------+--------------+
+| payment_id | amount | customer_id | product_id | trx_id            | currency | payment_date |
++------------+--------+-------------+------------+-------------------+----------+--------------+
+|          1 |    800 |           5 |          6 | 31B07494JS505133P | USD      | 0000-00-00   |
+|          2 |    500 |           5 |          9 | 18747053K31546734 | USD      | 0000-00-00   |
+|          3 |   1000 |           5 |          9 | 183154524M7953521 | USD      | 0000-00-00   |
+|          4 |    900 |           5 |          5 | 8L053110TE658224T | USD      | 2014-07-21   |
+|          5 |    450 |           5 |          8 | 42M62596JN658381G | USD      | 2014-07-21   |
+|          6 |    600 |           5 |          6 | 1FC71986FP579232R | USD      | 2014-07-21   |
+|          7 |    500 |           0 |          9 | 0AH67056C64289013 | USD      | 2014-07-23   |
+|          8 |   1800 |           0 |          5 | 1F431738AY795223E | USD      | 2014-08-08   |
+|          9 |    250 |           6 |          7 | 3G918931JL634141Y | USD      | 2014-08-08   |
+|         10 |   1500 |           6 |          9 | 0BF7586175203573G | USD      | 2014-08-08   |
+|         11 |   1800 |           6 |          5 | 7RS823437E828061K | USD      | 2014-08-08   |
+|         12 |   1800 |           6 |          8 | 84J65197FN011600G | USD      | 2014-08-08   |
+|         13 |     36 |           5 |          7 | QWQ3222R4EDSS     | USD      | 2014-09-09   |
+|         14 |     37 |           5 |          7 | QWQ3222R4EDSS     | USD      | 2014-09-09   |
+|         15 |   1500 |           5 |          7 | QWQ32R4EDSS       | USD      | 2014-10-09   |
++------------+--------+-------------+------------+-------------------+----------+--------------+
+15 rows in set (0.00 sec)
+
+mysql> drop trigger y;
+Query OK, 0 rows affected (0.01 sec)
+
+mysql> delimiter $$
+mysql> create trigger y before update on payments
+    -> for each row
+    -> begin
+    -> if new.amount<100 then
+    ->  set new.customer_id=9;
+    -> end if;
+    -> end $$
+Query OK, 0 rows affected (0.08 sec)
+
+mysql> delimiter ;
+mysql> insert into payments(payment_id,amount,customer_id,product_id,trx_id,currency,payment_date)values(16,45,5,7,'QWQ324EDSS','USD','2014-11-09');
+Query OK, 1 row affected (0.00 sec)
+
+mysql> select * from payments;
++------------+--------+-------------+------------+-------------------+----------+--------------+
+| payment_id | amount | customer_id | product_id | trx_id            | currency | payment_date |
++------------+--------+-------------+------------+-------------------+----------+--------------+
+|          1 |    800 |           5 |          6 | 31B07494JS505133P | USD      | 0000-00-00   |
+|          2 |    500 |           5 |          9 | 18747053K31546734 | USD      | 0000-00-00   |
+|          3 |   1000 |           5 |          9 | 183154524M7953521 | USD      | 0000-00-00   |
+|          4 |    900 |           5 |          5 | 8L053110TE658224T | USD      | 2014-07-21   |
+|          5 |    450 |           5 |          8 | 42M62596JN658381G | USD      | 2014-07-21   |
+|          6 |    600 |           5 |          6 | 1FC71986FP579232R | USD      | 2014-07-21   |
+|          7 |    500 |           0 |          9 | 0AH67056C64289013 | USD      | 2014-07-23   |
+|          8 |   1800 |           0 |          5 | 1F431738AY795223E | USD      | 2014-08-08   |
+|          9 |    250 |           6 |          7 | 3G918931JL634141Y | USD      | 2014-08-08   |
+|         10 |   1500 |           6 |          9 | 0BF7586175203573G | USD      | 2014-08-08   |
+|         11 |   1800 |           6 |          5 | 7RS823437E828061K | USD      | 2014-08-08   |
+|         12 |   1800 |           6 |          8 | 84J65197FN011600G | USD      | 2014-08-08   |
+|         13 |     36 |           5 |          7 | QWQ3222R4EDSS     | USD      | 2014-09-09   |
+|         14 |     37 |           5 |          7 | QWQ3222R4EDSS     | USD      | 2014-09-09   |
+|         15 |   1500 |           5 |          7 | QWQ32R4EDSS       | USD      | 2014-10-09   |
+|         16 |     45 |           5 |          7 | QWQ324EDSS        | USD      | 2014-11-09   |
++------------+--------+-------------+------------+-------------------+----------+--------------+
+16 rows in set (0.00 sec)
+
+mysql> drop trigger y;
+Query OK, 0 rows affected (0.00 sec)
+
+mysql> select * from payments;
++------------+--------+-------------+------------+-------------------+----------+--------------+
+| payment_id | amount | customer_id | product_id | trx_id            | currency | payment_date |
++------------+--------+-------------+------------+-------------------+----------+--------------+
+|          1 |    800 |           5 |          6 | 31B07494JS505133P | USD      | 0000-00-00   |
+|          2 |    500 |           5 |          9 | 18747053K31546734 | USD      | 0000-00-00   |
+|          3 |   1000 |           5 |          9 | 183154524M7953521 | USD      | 0000-00-00   |
+|          4 |    900 |           5 |          5 | 8L053110TE658224T | USD      | 2014-07-21   |
+|          5 |    450 |           5 |          8 | 42M62596JN658381G | USD      | 2014-07-21   |
+|          6 |    600 |           5 |          6 | 1FC71986FP579232R | USD      | 2014-07-21   |
+|          7 |    500 |           0 |          9 | 0AH67056C64289013 | USD      | 2014-07-23   |
+|          8 |   1800 |           0 |          5 | 1F431738AY795223E | USD      | 2014-08-08   |
+|          9 |    250 |           6 |          7 | 3G918931JL634141Y | USD      | 2014-08-08   |
+|         10 |   1500 |           6 |          9 | 0BF7586175203573G | USD      | 2014-08-08   |
+|         11 |   1800 |           6 |          5 | 7RS823437E828061K | USD      | 2014-08-08   |
+|         12 |   1800 |           6 |          8 | 84J65197FN011600G | USD      | 2014-08-08   |
+|         13 |     36 |           5 |          7 | QWQ3222R4EDSS     | USD      | 2014-09-09   |
+|         14 |     37 |           5 |          7 | QWQ3222R4EDSS     | USD      | 2014-09-09   |
+|         15 |   1500 |           5 |          7 | QWQ32R4EDSS       | USD      | 2014-10-09   |
+|         16 |     45 |           5 |          7 | QWQ324EDSS        | USD      | 2014-11-09   |
++------------+--------+-------------+------------+-------------------+----------+--------------+
+16 rows in set (0.00 sec)
+
+mysql> delimiter $$
+mysql> create trigger y before update on payments
+    -> for each row
+    -> begin
+    -> if new.customer_id<10 then
+    -> set new.customer_id=old.customer_id-1;
+    -> end if;
+    -> end$$
+Query OK, 0 rows affected (0.13 sec)
+
+mysql> delimiter ;
+mysql> insert into payments(payment_id,amount,customer_id,product_id,trx_id,currency,payment_date)values(17,456,5,7,'QWQ24EDSS','USD','2014-11-10');
+Query OK, 1 row affected (0.00 sec)
+
+mysql> select * from payments;
++------------+--------+-------------+------------+-------------------+----------+--------------+
+| payment_id | amount | customer_id | product_id | trx_id            | currency | payment_date |
++------------+--------+-------------+------------+-------------------+----------+--------------+
+|          1 |    800 |           5 |          6 | 31B07494JS505133P | USD      | 0000-00-00   |
+|          2 |    500 |           5 |          9 | 18747053K31546734 | USD      | 0000-00-00   |
+|          3 |   1000 |           5 |          9 | 183154524M7953521 | USD      | 0000-00-00   |
+|          4 |    900 |           5 |          5 | 8L053110TE658224T | USD      | 2014-07-21   |
+|          5 |    450 |           5 |          8 | 42M62596JN658381G | USD      | 2014-07-21   |
+|          6 |    600 |           5 |          6 | 1FC71986FP579232R | USD      | 2014-07-21   |
+|          7 |    500 |           0 |          9 | 0AH67056C64289013 | USD      | 2014-07-23   |
+|          8 |   1800 |           0 |          5 | 1F431738AY795223E | USD      | 2014-08-08   |
+|          9 |    250 |           6 |          7 | 3G918931JL634141Y | USD      | 2014-08-08   |
+|         10 |   1500 |           6 |          9 | 0BF7586175203573G | USD      | 2014-08-08   |
+|         11 |   1800 |           6 |          5 | 7RS823437E828061K | USD      | 2014-08-08   |
+|         12 |   1800 |           6 |          8 | 84J65197FN011600G | USD      | 2014-08-08   |
+|         13 |     36 |           5 |          7 | QWQ3222R4EDSS     | USD      | 2014-09-09   |
+|         14 |     37 |           5 |          7 | QWQ3222R4EDSS     | USD      | 2014-09-09   |
+|         15 |   1500 |           5 |          7 | QWQ32R4EDSS       | USD      | 2014-10-09   |
+|         16 |     45 |           5 |          7 | QWQ324EDSS        | USD      | 2014-11-09   |
+|         17 |    456 |           5 |          7 | QWQ24EDSS         | USD      | 2014-11-10   |
++------------+--------+-------------+------------+-------------------+----------+--------------+
+17 rows in set (0.00 sec)
+
+mysql> drop trigger y;
+Query OK, 0 rows affected (0.01 sec)
+
+mysql> select * from customers;
++-------------+----------------+---------------+----------------------+---------------+------------------+---------------+------------------+------------------+------------------------+
+| customer_id | customer_ip    | customer_name | customer_email       | customer_pass | customer_country | customer_city | customer_contact | customer_address | customer_image         |
++-------------+----------------+---------------+----------------------+---------------+------------------+---------------+------------------+------------------+------------------------+
+|           6 | 119.157.220.50 | Abdul Wali    | awpareshan@gmail.com | walikhan      | Pakistan         | Karachi       | 3243423          | dfads            | abdul-wali-ustaad1.jpg |
++-------------+----------------+---------------+----------------------+---------------+------------------+---------------+------------------+------------------+------------------------+
+1 row in set (0.00 sec)
+
+mysql> select * from brands;
++----------+-------------+
+| brand_id | brand_title |
++----------+-------------+
+|        1 | HP          |
+|        2 | DELL        |
+|        3 | LG          |
+|        4 | Samsung     |
+|        5 | Sony        |
+|        6 | Toshiba     |
+|        7 | Denim       |
++----------+-------------+
+7 rows in set (0.00 sec)
+
+mysql> select * from categories;
++--------+-----------+
+| cat_id | cat_title |
++--------+-----------+
+|      1 | Laptops   |
+|      2 | Cameras   |
+|      3 | Mobiles   |
+|      4 | Computers |
+|      5 | Banana    |
+|      6 | iPhones   |
+|      7 | clothes   |
++--------+-----------+
+7 rows in set (0.00 sec)
+
+mysql> delimiter $$
+mysql> create trigger m before update on brands
+    -> for each row
+    -> begin
+    -> if brand_title='xyz'
+    -> set brand_id=9;
+    -> end if;
+    -> end$$
+ERROR 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'set brand_id=9;
+end if;
+end' at line 5
+mysql> delimiter $$
+mysql> create trigger y before update on brands
+    -> for each row
+    -> begin
+    -> if new.brand_title='xyz' then
+    -> set new.brand_title='abc';
+    -> end if;
+    -> end$$
+Query OK, 0 rows affected (0.12 sec)
+
+mysql> delimiter ;
+mysql> insert into brands(brand_id,brand_title)values(8,'xyz');
+Query OK, 1 row affected (0.09 sec)
+
+mysql> select * from brands;
++----------+-------------+
+| brand_id | brand_title |
++----------+-------------+
+|        1 | HP          |
+|        2 | DELL        |
+|        3 | LG          |
+|        4 | Samsung     |
+|        5 | Sony        |
+|        6 | Toshiba     |
+|        7 | Denim       |
+|        8 | xyz         |
++----------+-------------+
+8 rows in set (0.00 sec)
+
+mysql> update brands set brand_title='xyz' where brand_id=8;
+Query OK, 1 row affected (0.04 sec)
+Rows matched: 1  Changed: 1  Warnings: 0
+
+mysql> select * from brands;
++----------+-------------+
+| brand_id | brand_title |
++----------+-------------+
+|        1 | HP          |
+|        2 | DELL        |
+|        3 | LG          |
+|        4 | Samsung     |
+|        5 | Sony        |
+|        6 | Toshiba     |
+|        7 | Denim       |
+|        8 | abc         |
++----------+-------------+
+8 rows in set (0.00 sec)
+
+mysql> delimiter $$
+mysql> delimiter ;
+mysql> select * from payments;
++------------+--------+-------------+------------+-------------------+----------+--------------+
+| payment_id | amount | customer_id | product_id | trx_id            | currency | payment_date |
++------------+--------+-------------+------------+-------------------+----------+--------------+
+|          1 |    800 |           5 |          6 | 31B07494JS505133P | USD      | 0000-00-00   |
+|          2 |    500 |           5 |          9 | 18747053K31546734 | USD      | 0000-00-00   |
+|          3 |   1000 |           5 |          9 | 183154524M7953521 | USD      | 0000-00-00   |
+|          4 |    900 |           5 |          5 | 8L053110TE658224T | USD      | 2014-07-21   |
+|          5 |    450 |           5 |          8 | 42M62596JN658381G | USD      | 2014-07-21   |
+|          6 |    600 |           5 |          6 | 1FC71986FP579232R | USD      | 2014-07-21   |
+|          7 |    500 |           0 |          9 | 0AH67056C64289013 | USD      | 2014-07-23   |
+|          8 |   1800 |           0 |          5 | 1F431738AY795223E | USD      | 2014-08-08   |
+|          9 |    250 |           6 |          7 | 3G918931JL634141Y | USD      | 2014-08-08   |
+|         10 |   1500 |           6 |          9 | 0BF7586175203573G | USD      | 2014-08-08   |
+|         11 |   1800 |           6 |          5 | 7RS823437E828061K | USD      | 2014-08-08   |
+|         12 |   1800 |           6 |          8 | 84J65197FN011600G | USD      | 2014-08-08   |
+|         13 |     36 |           5 |          7 | QWQ3222R4EDSS     | USD      | 2014-09-09   |
+|         14 |     37 |           5 |          7 | QWQ3222R4EDSS     | USD      | 2014-09-09   |
+|         15 |   1500 |           5 |          7 | QWQ32R4EDSS       | USD      | 2014-10-09   |
+|         16 |     45 |           5 |          7 | QWQ324EDSS        | USD      | 2014-11-09   |
+|         17 |    456 |           5 |          7 | QWQ24EDSS         | USD      | 2014-11-10   |
++------------+--------+-------------+------------+-------------------+----------+--------------+
+17 rows in set (0.00 sec)
+
+mysql> delimiter $$
+mysql> delimiter ;
+mysql> select * from orders;
++----------+------+------+-----+------------+-------------+------------+
+| order_id | p_id | c_id | qty | invoice_no | status      | order_date |
++----------+------+------+-----+------------+-------------+------------+
+|        4 |    7 |    6 |   3 |    3427322 | completed   | 2014-09-09 |
+|        6 |    6 |    5 |   3 |  481994459 | Completed   | 2014-07-21 |
+|        7 |    9 |    0 |   1 | 1545302558 | completed   | 2014-07-23 |
+|        8 |    5 |    0 |   2 |  705705316 | in Progress | 2014-08-08 |
+|        9 |    7 |    6 |   1 | 1935681132 | in Progress | 2014-08-08 |
+|       10 |    9 |    6 |   3 | 1817786416 | completed   | 2014-08-08 |
+|       11 |    5 |    6 |   2 |  423122154 | in Progress | 2014-08-08 |
+|       12 |    8 |    6 |   4 |  496641685 | in Progress | 2014-08-08 |
+|       13 |   10 |    6 |   3 |    3427322 | completed   | 2014-09-09 |
++----------+------+------+-----+------------+-------------+------------+
+9 rows in set (0.00 sec)
+
+mysql> delimiter $$
+mysql> create trigger after update on payments
+    -> for each row
+    -> begin
+    -> delimiter $$
+ERROR 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'update on payments
+for each row
+begin
+delimiter' at line 1
+mysql> select * from categories;
+    -> delimter $$
++--------+-----------+
+| cat_id | cat_title |
++--------+-----------+
+|      1 | Laptops   |
+|      2 | Cameras   |
+|      3 | Mobiles   |
+|      4 | Computers |
+|      5 | Banana    |
+|      6 | iPhones   |
+|      7 | clothes   |
++--------+-----------+
+7 rows in set (0.00 sec)
+
+ERROR 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'delimter' at line 1
+mysql> delimiter ;
+mysql> select * from orders;
++----------+------+------+-----+------------+-------------+------------+
+| order_id | p_id | c_id | qty | invoice_no | status      | order_date |
++----------+------+------+-----+------------+-------------+------------+
+|        4 |    7 |    6 |   3 |    3427322 | completed   | 2014-09-09 |
+|        6 |    6 |    5 |   3 |  481994459 | Completed   | 2014-07-21 |
+|        7 |    9 |    0 |   1 | 1545302558 | completed   | 2014-07-23 |
+|        8 |    5 |    0 |   2 |  705705316 | in Progress | 2014-08-08 |
+|        9 |    7 |    6 |   1 | 1935681132 | in Progress | 2014-08-08 |
+|       10 |    9 |    6 |   3 | 1817786416 | completed   | 2014-08-08 |
+|       11 |    5 |    6 |   2 |  423122154 | in Progress | 2014-08-08 |
+|       12 |    8 |    6 |   4 |  496641685 | in Progress | 2014-08-08 |
+|       13 |   10 |    6 |   3 |    3427322 | completed   | 2014-09-09 |
++----------+------+------+-----+------------+-------------+------------+
+9 rows in set (0.00 sec)
+
+mysql> select * from customers;
++-------------+----------------+---------------+----------------------+---------------+------------------+---------------+------------------+------------------+------------------------+
+| customer_id | customer_ip    | customer_name | customer_email       | customer_pass | customer_country | customer_city | customer_contact | customer_address | customer_image         |
++-------------+----------------+---------------+----------------------+---------------+------------------+---------------+------------------+------------------+------------------------+
+|           6 | 119.157.220.50 | Abdul Wali    | awpareshan@gmail.com | walikhan      | Pakistan         | Karachi       | 3243423          | dfads            | abdul-wali-ustaad1.jpg |
++-------------+----------------+---------------+----------------------+---------------+------------------+---------------+------------------+------------------+------------------------+
+1 row in set (0.00 sec)
+
+mysql> delimiter $$
+mysql> create trigger n after update on categories
+    -> for each row
+    -> begin
+    -> update orders set order_id=14,p_id=6,c_id=new.c_id,qty=4,invoice_no=4554544,status='completed',order_date='2014-09-09';
+    -> end$$
+ERROR 1054 (42S22): Unknown column 'c_id' in 'NEW'
+mysql> delimiter $$
+mysql> create trigger after update on categories
+    -> for each row
+    -> begin
+    -> update orders set order_id=14,p_id=6,c_id=new.cat_id,qty=4,invoice_no=4554544,status='completed',order_date='2014-09-09';
+    -> end$$
+ERROR 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'update on categories
+for each row
+begin
+update orders set order_id=14,p_id=6,c_i' at line 1
+mysql> delimiter $$
+mysql> create trigger n after update on categories
+    -> for each row
+    -> begin
+    -> update orders set order_id=14,p_id=6,new.c_id=new.cat_id,qty=4,invoice_no=4554544,status='completed',order_date='2014-09-09';
+    -> end$$
+ERROR 1054 (42S22): Unknown column 'c_id' in 'NEW'
+mysql> delimiter $$
+mysql> create trigger n after update on categories
+    -> for each row
+    -> begin
+    -> update orders set order_id=14,p_id=6,new.c_id=cat_id,qty=4,invoice_no=4554544,status='completed',order_date='2014-09-09';
+    -> end$$
+ERROR 1054 (42S22): Unknown column 'c_id' in 'NEW'
+mysql> delimiter $$
+mysql> create trigger n after update on categories
+    -> update orders set order_id=14,p_id=6,old.c_id=new.cat_id,qty=4,invoice_no=4554544,status='completed',order_date='2014-09-09';
+    -> end$$
+ERROR 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'update orders set order_id=14,p_id=6,old.c_id=new.cat_id,qty=4,invoice_no=455454' at line 2
+mysql> delimiter $$
+mysql> create trigger n after update on categories
+    -> for each row
+    -> begin
+    -> update orders set order_id=14,p_id=6,c_id=new.cat_id,qty=4,invoice_no=4554544,status='completed',order_date='2014-09-09';
+    -> end$$
+Query OK, 0 rows affected (0.12 sec)
+
+mysql> delimiter ;
+mysql> select * from categories;
++--------+-----------+
+| cat_id | cat_title |
++--------+-----------+
+|      1 | Laptops   |
+|      2 | Cameras   |
+|      3 | Mobiles   |
+|      4 | Computers |
+|      5 | Banana    |
+|      6 | iPhones   |
+|      7 | clothes   |
++--------+-----------+
+7 rows in set (0.00 sec)
+
+mysql> update categories cat_id=8 where cat_title='clothes';
+ERROR 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '=8 where cat_title='clothes'' at line 1
+mysql> update categories set cat_id=8 where cat_title='clothes';
+ERROR 1062 (23000): Duplicate entry '14' for key 'PRIMARY'
+mysql> update categories set cat_id=9 where cat_title='clothes';
+ERROR 1062 (23000): Duplicate entry '14' for key 'PRIMARY'
+mysql> select * from orders;
++----------+------+------+-----+------------+-------------+------------+
+| order_id | p_id | c_id | qty | invoice_no | status      | order_date |
++----------+------+------+-----+------------+-------------+------------+
+|       14 |    6 |    9 |   4 |    4554544 | completed   | 2014-09-09 |
+|        6 |    6 |    5 |   3 |  481994459 | Completed   | 2014-07-21 |
+|        7 |    9 |    0 |   1 | 1545302558 | completed   | 2014-07-23 |
+|        8 |    5 |    0 |   2 |  705705316 | in Progress | 2014-08-08 |
+|        9 |    7 |    6 |   1 | 1935681132 | in Progress | 2014-08-08 |
+|       10 |    9 |    6 |   3 | 1817786416 | completed   | 2014-08-08 |
+|       11 |    5 |    6 |   2 |  423122154 | in Progress | 2014-08-08 |
+|       12 |    8 |    6 |   4 |  496641685 | in Progress | 2014-08-08 |
+|       13 |   10 |    6 |   3 |    3427322 | completed   | 2014-09-09 |
++----------+------+------+-----+------------+-------------+------------+
+9 rows in set (0.00 sec)
+
+mysql> insert into orders(order_id,p_id,c_id,qty,invoice_no,status,order_date)values(14,6,10,4,43737838,'completed','2014-09-09';)
+ERROR 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '' at line 1
+    -> delimiter $$
+    -> delimiter ;
+ERROR 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near ')
+delimiter $$delimiter' at line 1
+mysql> insert into orders(order_id,p_id,c_id,qty,invoice_no,status,order_date)values(14,6,10,4,43737838,'completed','2014-09-09');
+ERROR 1062 (23000): Duplicate entry '14' for key 'PRIMARY'
+mysql> insert into orders(order_id,p_id,c_id,qty,invoice_no,status,order_date)values(25,6,10,4,43737838,'completed','2014-09-09');
+Query OK, 1 row affected (0.00 sec)
+
+mysql> update categories cat_id=8 where cat_title='clothes';
+ERROR 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '=8 where cat_title='clothes'' at line 1
+mysql> update categories set cat_id=8 where cat_title='clothes';
+ERROR 1062 (23000): Duplicate entry '14' for key 'PRIMARY'
+mysql> select * from orders;
++----------+------+------+-----+------------+-------------+------------+
+| order_id | p_id | c_id | qty | invoice_no | status      | order_date |
++----------+------+------+-----+------------+-------------+------------+
+|       14 |    6 |    8 |   4 |    4554544 | completed   | 2014-09-09 |
+|        6 |    6 |    5 |   3 |  481994459 | Completed   | 2014-07-21 |
+|        7 |    9 |    0 |   1 | 1545302558 | completed   | 2014-07-23 |
+|        8 |    5 |    0 |   2 |  705705316 | in Progress | 2014-08-08 |
+|        9 |    7 |    6 |   1 | 1935681132 | in Progress | 2014-08-08 |
+|       10 |    9 |    6 |   3 | 1817786416 | completed   | 2014-08-08 |
+|       11 |    5 |    6 |   2 |  423122154 | in Progress | 2014-08-08 |
+|       12 |    8 |    6 |   4 |  496641685 | in Progress | 2014-08-08 |
+|       13 |   10 |    6 |   3 |    3427322 | completed   | 2014-09-09 |
+|       25 |    6 |   10 |   4 |   43737838 | completed   | 2014-09-09 |
++----------+------+------+-----+------------+-------------+------------+
+10 rows in set (0.00 sec)
+
+mysql> delete * from orders where order_id = 14;
+ERROR 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '* from orders where order_id = 14' at line 1
+mysql> delete from orders where order_id = 14;
+Query OK, 1 row affected (0.00 sec)
+
+mysql> select * from orders;
++----------+------+------+-----+------------+-------------+------------+
+| order_id | p_id | c_id | qty | invoice_no | status      | order_date |
++----------+------+------+-----+------------+-------------+------------+
+|        6 |    6 |    5 |   3 |  481994459 | Completed   | 2014-07-21 |
+|        7 |    9 |    0 |   1 | 1545302558 | completed   | 2014-07-23 |
+|        8 |    5 |    0 |   2 |  705705316 | in Progress | 2014-08-08 |
+|        9 |    7 |    6 |   1 | 1935681132 | in Progress | 2014-08-08 |
+|       10 |    9 |    6 |   3 | 1817786416 | completed   | 2014-08-08 |
+|       11 |    5 |    6 |   2 |  423122154 | in Progress | 2014-08-08 |
+|       12 |    8 |    6 |   4 |  496641685 | in Progress | 2014-08-08 |
+|       13 |   10 |    6 |   3 |    3427322 | completed   | 2014-09-09 |
+|       25 |    6 |   10 |   4 |   43737838 | completed   | 2014-09-09 |
++----------+------+------+-----+------------+-------------+------------+
+9 rows in set (0.00 sec)
+
+mysql> update categories set cat_id=8 where cat_title='clothes';
+ERROR 1062 (23000): Duplicate entry '14' for key 'PRIMARY'
+mysql> show triggers;
++---------+--------+------------+-------------------------------------------------------------------------------------------------------------------------------------+--------+---------+----------------------------------------------------------------+----------------+----------------------+----------------------+--------------------+
+| Trigger | Event  | Table      | Statement                                                                                                                           | Timing | Created | sql_mode                                                       | Definer        | character_set_client | collation_connection | Database Collation |
++---------+--------+------------+-------------------------------------------------------------------------------------------------------------------------------------+--------+---------+----------------------------------------------------------------+----------------+----------------------+----------------------+--------------------+
+| y       | UPDATE | brands     | begin
+if new.brand_title='xyz' then
+set new.brand_title='abc';
+end if;
+end                                                          | BEFORE | NULL    | STRICT_TRANS_TABLES,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION | root@localhost | latin1               | latin1_swedish_ci    | latin1_swedish_ci  |
+| u       | UPDATE | cart       | begin
+if new.qty<0 then
+set new.qty=0;
+end if;
+end                                                                                  | BEFORE | NULL    | STRICT_TRANS_TABLES,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION | root@localhost | latin1               | latin1_swedish_ci    | latin1_swedish_ci  |
+| n       | UPDATE | categories | begin
+update orders set order_id=14,p_id=6,c_id=new.cat_id,qty=4,invoice_no=4554544,status='completed',order_date='2014-09-09';
+end | AFTER  | NULL    | STRICT_TRANS_TABLES,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION | root@localhost | latin1               | latin1_swedish_ci    | latin1_swedish_ci  |
++---------+--------+------------+-------------------------------------------------------------------------------------------------------------------------------------+--------+---------+----------------------------------------------------------------+----------------+----------------------+----------------------+--------------------+
+3 rows in set (0.08 sec)
+
+mysql> drop trigger n;
+Query OK, 0 rows affected (0.00 sec)
+
+mysql> delimiter $$
+mysql> create trigger n after update on categories
+    -> for each row
+    -> begin
+    -> update orders set p_id=6,new.c_id=new.cat_id,qty=4,invoice_no=4554544,status='completed',order_date='2014-09-09';
+    -> end$$
+ERROR 1054 (42S22): Unknown column 'c_id' in 'NEW'
+mysql> delimiter $$
+mysql> create trigger n after update on categories
+    -> for each row
+    -> begin
+    -> update orders set p_id=6,c_id=new.cat_id,qty=4,invoice_no=4554544,status='completed',order_date='2014-09-09';
+    -> end$$
+Query OK, 0 rows affected (0.10 sec)
+
+mysql> delimiter ;
+mysql> update categories set cat_id=8 where cat_title='clothes';
+Query OK, 1 row affected (0.06 sec)
+Rows matched: 1  Changed: 1  Warnings: 0
+
+mysql> select * from orders;
++----------+------+------+-----+------------+-----------+------------+
+| order_id | p_id | c_id | qty | invoice_no | status    | order_date |
++----------+------+------+-----+------------+-----------+------------+
+|       14 |    6 |    8 |   4 |    4554544 | completed | 2014-09-09 |
+|        7 |    6 |    8 |   4 |    4554544 | completed | 2014-09-09 |
+|        8 |    6 |    8 |   4 |    4554544 | completed | 2014-09-09 |
+|        9 |    6 |    8 |   4 |    4554544 | completed | 2014-09-09 |
+|       10 |    6 |    8 |   4 |    4554544 | completed | 2014-09-09 |
+|       11 |    6 |    8 |   4 |    4554544 | completed | 2014-09-09 |
+|       12 |    6 |    8 |   4 |    4554544 | completed | 2014-09-09 |
+|       13 |    6 |    8 |   4 |    4554544 | completed | 2014-09-09 |
+|       25 |    6 |    8 |   4 |    4554544 | completed | 2014-09-09 |
++----------+------+------+-----+------------+-----------+------------+
+9 rows in set (0.00 sec)
+
+mysql> select * from payments;
++------------+--------+-------------+------------+-------------------+----------+--------------+
+| payment_id | amount | customer_id | product_id | trx_id            | currency | payment_date |
++------------+--------+-------------+------------+-------------------+----------+--------------+
+|          1 |    800 |           5 |          6 | 31B07494JS505133P | USD      | 0000-00-00   |
+|          2 |    500 |           5 |          9 | 18747053K31546734 | USD      | 0000-00-00   |
+|          3 |   1000 |           5 |          9 | 183154524M7953521 | USD      | 0000-00-00   |
+|          4 |    900 |           5 |          5 | 8L053110TE658224T | USD      | 2014-07-21   |
+|          5 |    450 |           5 |          8 | 42M62596JN658381G | USD      | 2014-07-21   |
+|          6 |    600 |           5 |          6 | 1FC71986FP579232R | USD      | 2014-07-21   |
+|          7 |    500 |           0 |          9 | 0AH67056C64289013 | USD      | 2014-07-23   |
+|          8 |   1800 |           0 |          5 | 1F431738AY795223E | USD      | 2014-08-08   |
+|          9 |    250 |           6 |          7 | 3G918931JL634141Y | USD      | 2014-08-08   |
+|         10 |   1500 |           6 |          9 | 0BF7586175203573G | USD      | 2014-08-08   |
+|         11 |   1800 |           6 |          5 | 7RS823437E828061K | USD      | 2014-08-08   |
+|         12 |   1800 |           6 |          8 | 84J65197FN011600G | USD      | 2014-08-08   |
+|         13 |     36 |           5 |          7 | QWQ3222R4EDSS     | USD      | 2014-09-09   |
+|         14 |     37 |           5 |          7 | QWQ3222R4EDSS     | USD      | 2014-09-09   |
+|         15 |   1500 |           5 |          7 | QWQ32R4EDSS       | USD      | 2014-10-09   |
+|         16 |     45 |           5 |          7 | QWQ324EDSS        | USD      | 2014-11-09   |
+|         17 |    456 |           5 |          7 | QWQ24EDSS         | USD      | 2014-11-10   |
++------------+--------+-------------+------------+-------------------+----------+--------------+
+17 rows in set (0.00 sec)
+
+mysql> select *  from products;
++------------+-------------+---------------+------------------+---------------+-----------------------------------------------------------------------------------------------------+----------------------------------------------+-----------------------------+
+| product_id | product_cat | product_brand | product_title    | product_price | product_desc                                                                                        | product_image                                | product_keywords            |
++------------+-------------+---------------+------------------+---------------+-----------------------------------------------------------------------------------------------------+----------------------------------------------+-----------------------------+
+|          5 |           3 |             4 | Samsung Camera   |           900 | <p>This is a great samsung mobile, you must buy it in order to have some really good fun.&nbsp;</p> | Samsung-Galaxy-Tab-tablet.jpg                | Samsung, Cameras, Special   |
+|          6 |           3 |             6 | HTC mobile       |           200 | <p>this one is a great one.</p>                                                                     | HTC-Google-Nexus-One-2.jpg                   | mobiles, new, special       |
+|          8 |           3 |             5 | Nokia Tablet     |           450 | <p>this is a great thing....</p>                                                                    | nokia-windows-200-dollar-tablet2-640x353.jpg | Samsung, Cameras, Special   |
+|          9 |           1 |             2 | Dell Pink Laptop |           500 | <p>this is a very nice <strong>laptop</strong> and I like it very much....</p>                      | 1.jpg                                        | dell, laptops, new, special |
+|         10 |           1 |             1 | HP Envy Laptop   |           400 | <p>this is so much nice laptop..</p>                                                                | original.jpg                                 | dell, laptops, new, special |
++------------+-------------+---------------+------------------+---------------+-----------------------------------------------------------------------------------------------------+----------------------------------------------+-----------------------------+
+5 rows in set (0.00 sec)
+
+mysql> select * from orders;
++----------+------+------+-----+------------+-----------+------------+
+| order_id | p_id | c_id | qty | invoice_no | status    | order_date |
++----------+------+------+-----+------------+-----------+------------+
+|       14 |    6 |    8 |   4 |    4554544 | completed | 2014-09-09 |
+|        7 |    6 |    8 |   4 |    4554544 | completed | 2014-09-09 |
+|        8 |    6 |    8 |   4 |    4554544 | completed | 2014-09-09 |
+|        9 |    6 |    8 |   4 |    4554544 | completed | 2014-09-09 |
+|       10 |    6 |    8 |   4 |    4554544 | completed | 2014-09-09 |
+|       11 |    6 |    8 |   4 |    4554544 | completed | 2014-09-09 |
+|       12 |    6 |    8 |   4 |    4554544 | completed | 2014-09-09 |
+|       13 |    6 |    8 |   4 |    4554544 | completed | 2014-09-09 |
+|       25 |    6 |    8 |   4 |    4554544 | completed | 2014-09-09 |
++----------+------+------+-----+------------+-----------+------------+
+9 rows in set (0.00 sec)
+
+mysql> select * from payments;
++------------+--------+-------------+------------+-------------------+----------+--------------+
+| payment_id | amount | customer_id | product_id | trx_id            | currency | payment_date |
++------------+--------+-------------+------------+-------------------+----------+--------------+
+|          1 |    800 |           5 |          6 | 31B07494JS505133P | USD      | 0000-00-00   |
+|          2 |    500 |           5 |          9 | 18747053K31546734 | USD      | 0000-00-00   |
+|          3 |   1000 |           5 |          9 | 183154524M7953521 | USD      | 0000-00-00   |
+|          4 |    900 |           5 |          5 | 8L053110TE658224T | USD      | 2014-07-21   |
+|          5 |    450 |           5 |          8 | 42M62596JN658381G | USD      | 2014-07-21   |
+|          6 |    600 |           5 |          6 | 1FC71986FP579232R | USD      | 2014-07-21   |
+|          7 |    500 |           0 |          9 | 0AH67056C64289013 | USD      | 2014-07-23   |
+|          8 |   1800 |           0 |          5 | 1F431738AY795223E | USD      | 2014-08-08   |
+|          9 |    250 |           6 |          7 | 3G918931JL634141Y | USD      | 2014-08-08   |
+|         10 |   1500 |           6 |          9 | 0BF7586175203573G | USD      | 2014-08-08   |
+|         11 |   1800 |           6 |          5 | 7RS823437E828061K | USD      | 2014-08-08   |
+|         12 |   1800 |           6 |          8 | 84J65197FN011600G | USD      | 2014-08-08   |
+|         13 |     36 |           5 |          7 | QWQ3222R4EDSS     | USD      | 2014-09-09   |
+|         14 |     37 |           5 |          7 | QWQ3222R4EDSS     | USD      | 2014-09-09   |
+|         15 |   1500 |           5 |          7 | QWQ32R4EDSS       | USD      | 2014-10-09   |
+|         16 |     45 |           5 |          7 | QWQ324EDSS        | USD      | 2014-11-09   |
+|         17 |    456 |           5 |          7 | QWQ24EDSS         | USD      | 2014-11-10   |
++------------+--------+-------------+------------+-------------------+----------+--------------+
+17 rows in set (0.00 sec)
+
+mysql> delimiter $$
+mysql> create trigger r before insert on payments
+    -> for each row
+    -> begin
+    -> insert into orders(p_id,c_id,qty,invoice_no,status,order_date) values(new.product_id,new.customer_id,7,3443222,'completed',2014-08-09);
+    -> end$$
+Query OK, 0 rows affected (0.10 sec)
+
+mysql> delimiter ;
+mysql> insert into payments(amount,customer_id,product_id,trx_id,currency,payment_date)values(340,7,5,'32JSDJDSJKS','USD','2015-09-08');
+ERROR 1292 (22007): Incorrect date value: '1997' for column 'order_date' at row 1
+mysql> SHOW TRIGGERS;
++---------+--------+------------+---------------------------------------------------------------------------------------------------------------------------------------------------+--------+---------+----------------------------------------------------------------+----------------+----------------------+----------------------+--------------------+
+| Trigger | Event  | Table      | Statement                                                                                                                                         | Timing | Created | sql_mode                                                       | Definer        | character_set_client | collation_connection | Database Collation |
++---------+--------+------------+---------------------------------------------------------------------------------------------------------------------------------------------------+--------+---------+----------------------------------------------------------------+----------------+----------------------+----------------------+--------------------+
+| y       | UPDATE | brands     | begin
+if new.brand_title='xyz' then
+set new.brand_title='abc';
+end if;
+end                                                                        | BEFORE | NULL    | STRICT_TRANS_TABLES,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION | root@localhost | latin1               | latin1_swedish_ci    | latin1_swedish_ci  |
+| u       | UPDATE | cart       | begin
+if new.qty<0 then
+set new.qty=0;
+end if;
+end                                                                                                | BEFORE | NULL    | STRICT_TRANS_TABLES,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION | root@localhost | latin1               | latin1_swedish_ci    | latin1_swedish_ci  |
+| n       | UPDATE | categories | begin
+update orders set p_id=6,c_id=new.cat_id,qty=4,invoice_no=4554544,status='completed',order_date='2014-09-09';
+end                           | AFTER  | NULL    | STRICT_TRANS_TABLES,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION | root@localhost | latin1               | latin1_swedish_ci    | latin1_swedish_ci  |
+| r       | INSERT | payments   | begin
+insert into orders(p_id,c_id,qty,invoice_no,status,order_date) values(new.product_id,new.customer_id,7,3443222,'completed',2014-08-09);
+end | BEFORE | NULL    | STRICT_TRANS_TABLES,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION | root@localhost | latin1               | latin1_swedish_ci    | latin1_swedish_ci  |
++---------+--------+------------+---------------------------------------------------------------------------------------------------------------------------------------------------+--------+---------+----------------------------------------------------------------+----------------+----------------------+----------------------+--------------------+
+4 rows in set (0.02 sec)
+
+mysql> drop trigger r;
+Query OK, 0 rows affected (0.00 sec)
+
+mysql> delimiter $$
+mysql> create trigger r before insert on payments
+    -> for each row
+    -> begin
+    -> insert into orders(p_id,c_id,qty,invoice_no,status,order_date) values(new.product_id,new.customer_id,7,3443222,'completed','2014-08-09');
+    -> end$$
+Query OK, 0 rows affected (0.10 sec)
+
+mysql> delimiter ;
+mysql> insert into orders(p_id,c_id,qty,invoice_no,status,order_date) values(new.product_id,new.customer_id,7,3443222,'completed','2014-08-09');
+ERROR 1054 (42S22): Unknown column 'new.product_id' in 'field list'
+mysql> insert into payments(amount,customer_id,product_id,trx_id,currency,payment_date)values(340,7,5,'32JSDJDSJKS','USD','2015-09-08');
+Query OK, 1 row affected (0.00 sec)
+
+mysql> select * from payments;
++------------+--------+-------------+------------+-------------------+----------+--------------+
+| payment_id | amount | customer_id | product_id | trx_id            | currency | payment_date |
++------------+--------+-------------+------------+-------------------+----------+--------------+
+|          1 |    800 |           5 |          6 | 31B07494JS505133P | USD      | 0000-00-00   |
+|          2 |    500 |           5 |          9 | 18747053K31546734 | USD      | 0000-00-00   |
+|          3 |   1000 |           5 |          9 | 183154524M7953521 | USD      | 0000-00-00   |
+|          4 |    900 |           5 |          5 | 8L053110TE658224T | USD      | 2014-07-21   |
+|          5 |    450 |           5 |          8 | 42M62596JN658381G | USD      | 2014-07-21   |
+|          6 |    600 |           5 |          6 | 1FC71986FP579232R | USD      | 2014-07-21   |
+|          7 |    500 |           0 |          9 | 0AH67056C64289013 | USD      | 2014-07-23   |
+|          8 |   1800 |           0 |          5 | 1F431738AY795223E | USD      | 2014-08-08   |
+|          9 |    250 |           6 |          7 | 3G918931JL634141Y | USD      | 2014-08-08   |
+|         10 |   1500 |           6 |          9 | 0BF7586175203573G | USD      | 2014-08-08   |
+|         11 |   1800 |           6 |          5 | 7RS823437E828061K | USD      | 2014-08-08   |
+|         12 |   1800 |           6 |          8 | 84J65197FN011600G | USD      | 2014-08-08   |
+|         13 |     36 |           5 |          7 | QWQ3222R4EDSS     | USD      | 2014-09-09   |
+|         14 |     37 |           5 |          7 | QWQ3222R4EDSS     | USD      | 2014-09-09   |
+|         15 |   1500 |           5 |          7 | QWQ32R4EDSS       | USD      | 2014-10-09   |
+|         16 |     45 |           5 |          7 | QWQ324EDSS        | USD      | 2014-11-09   |
+|         17 |    456 |           5 |          7 | QWQ24EDSS         | USD      | 2014-11-10   |
+|         18 |    340 |           7 |          5 | 32JSDJDSJKS       | USD      | 2015-09-08   |
++------------+--------+-------------+------------+-------------------+----------+--------------+
+18 rows in set (0.00 sec)
+
+mysql> select * from orders;
++----------+------+------+-----+------------+-----------+------------+
+| order_id | p_id | c_id | qty | invoice_no | status    | order_date |
++----------+------+------+-----+------------+-----------+------------+
+|       14 |    6 |    8 |   4 |    4554544 | completed | 2014-09-09 |
+|        7 |    6 |    8 |   4 |    4554544 | completed | 2014-09-09 |
+|        8 |    6 |    8 |   4 |    4554544 | completed | 2014-09-09 |
+|        9 |    6 |    8 |   4 |    4554544 | completed | 2014-09-09 |
+|       10 |    6 |    8 |   4 |    4554544 | completed | 2014-09-09 |
+|       11 |    6 |    8 |   4 |    4554544 | completed | 2014-09-09 |
+|       12 |    6 |    8 |   4 |    4554544 | completed | 2014-09-09 |
+|       13 |    6 |    8 |   4 |    4554544 | completed | 2014-09-09 |
+|       25 |    6 |    8 |   4 |    4554544 | completed | 2014-09-09 |
+|       26 |    5 |    7 |   7 |    3443222 | completed | 2014-08-09 |
++----------+------+------+-----+------------+-----------+------------+
+10 rows in set (0.00 sec)
+
+mysql> show tables'=;
+    '> ;
+    '> $$
+    '> $$;
+    '> ^N
+    '> '
+    -> ;
+ERROR 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near ''=;
+;
+$$
+$$;
+
+'' at line 1
+mysql> show tables;
++------------------------+
+| Tables_in_shoppingcart |
++------------------------+
+| admins                 |
+| brands                 |
+| cart                   |
+| categories             |
+| customers              |
+| orders                 |
+| payments               |
+| products               |
++------------------------+
+8 rows in set (0.02 sec)
+
+mysql> select * from admins;
++---------+----------------------+-----------+
+| user_id | user_email           | user_pass |
++---------+----------------------+-----------+
+|       1 | awpareshan@gmail.com | wali      |
+|       2 | saima@yahoo.com      | khan      |
++---------+----------------------+-----------+
+2 rows in set (0.00 sec)
+
+mysql> select * from payments;
++------------+--------+-------------+------------+-------------------+----------+--------------+
+| payment_id | amount | customer_id | product_id | trx_id            | currency | payment_date |
++------------+--------+-------------+------------+-------------------+----------+--------------+
+|          1 |    800 |           5 |          6 | 31B07494JS505133P | USD      | 0000-00-00   |
+|          2 |    500 |           5 |          9 | 18747053K31546734 | USD      | 0000-00-00   |
+|          3 |   1000 |           5 |          9 | 183154524M7953521 | USD      | 0000-00-00   |
+|          4 |    900 |           5 |          5 | 8L053110TE658224T | USD      | 2014-07-21   |
+|          5 |    450 |           5 |          8 | 42M62596JN658381G | USD      | 2014-07-21   |
+|          6 |    600 |           5 |          6 | 1FC71986FP579232R | USD      | 2014-07-21   |
+|          7 |    500 |           0 |          9 | 0AH67056C64289013 | USD      | 2014-07-23   |
+|          8 |   1800 |           0 |          5 | 1F431738AY795223E | USD      | 2014-08-08   |
+|          9 |    250 |           6 |          7 | 3G918931JL634141Y | USD      | 2014-08-08   |
+|         10 |   1500 |           6 |          9 | 0BF7586175203573G | USD      | 2014-08-08   |
+|         11 |   1800 |           6 |          5 | 7RS823437E828061K | USD      | 2014-08-08   |
+|         12 |   1800 |           6 |          8 | 84J65197FN011600G | USD      | 2014-08-08   |
+|         13 |     36 |           5 |          7 | QWQ3222R4EDSS     | USD      | 2014-09-09   |
+|         14 |     37 |           5 |          7 | QWQ3222R4EDSS     | USD      | 2014-09-09   |
+|         15 |   1500 |           5 |          7 | QWQ32R4EDSS       | USD      | 2014-10-09   |
+|         16 |     45 |           5 |          7 | QWQ324EDSS        | USD      | 2014-11-09   |
+|         17 |    456 |           5 |          7 | QWQ24EDSS         | USD      | 2014-11-10   |
+|         18 |    340 |           7 |          5 | 32JSDJDSJKS       | USD      | 2015-09-08   |
++------------+--------+-------------+------------+-------------------+----------+--------------+
+18 rows in set (0.00 sec)
+
+mysql> create view  payments_view as select payment_id,trx_id from payments;
+Query OK, 0 rows affected (0.10 sec)
+
+mysql> select * from payments_view;
++------------+-------------------+
+| payment_id | trx_id            |
++------------+-------------------+
+|          1 | 31B07494JS505133P |
+|          2 | 18747053K31546734 |
+|          3 | 183154524M7953521 |
+|          4 | 8L053110TE658224T |
+|          5 | 42M62596JN658381G |
+|          6 | 1FC71986FP579232R |
+|          7 | 0AH67056C64289013 |
+|          8 | 1F431738AY795223E |
+|          9 | 3G918931JL634141Y |
+|         10 | 0BF7586175203573G |
+|         11 | 7RS823437E828061K |
+|         12 | 84J65197FN011600G |
+|         13 | QWQ3222R4EDSS     |
+|         14 | QWQ3222R4EDSS     |
+|         15 | QWQ32R4EDSS       |
+|         16 | QWQ324EDSS        |
+|         17 | QWQ24EDSS         |
+|         18 | 32JSDJDSJKS       |
++------------+-------------------+
+18 rows in set (0.00 sec)
+
+mysql> select * from orders;
++----------+------+------+-----+------------+-----------+------------+
+| order_id | p_id | c_id | qty | invoice_no | status    | order_date |
++----------+------+------+-----+------------+-----------+------------+
+|       14 |    6 |    8 |   4 |    4554544 | completed | 2014-09-09 |
+|        7 |    6 |    8 |   4 |    4554544 | completed | 2014-09-09 |
+|        8 |    6 |    8 |   4 |    4554544 | completed | 2014-09-09 |
+|        9 |    6 |    8 |   4 |    4554544 | completed | 2014-09-09 |
+|       10 |    6 |    8 |   4 |    4554544 | completed | 2014-09-09 |
+|       11 |    6 |    8 |   4 |    4554544 | completed | 2014-09-09 |
+|       12 |    6 |    8 |   4 |    4554544 | completed | 2014-09-09 |
+|       13 |    6 |    8 |   4 |    4554544 | completed | 2014-09-09 |
+|       25 |    6 |    8 |   4 |    4554544 | completed | 2014-09-09 |
+|       26 |    5 |    7 |   7 |    3443222 | completed | 2014-08-09 |
++----------+------+------+-----+------------+-----------+------------+
+10 rows in set (0.00 sec)
+
+mysql> create view views_order as select order_id,invoice_no,order_date from orders;
+Query OK, 0 rows affected (0.06 sec)
+
+mysql> select * from views_order;
++----------+------------+------------+
+| order_id | invoice_no | order_date |
++----------+------------+------------+
+|       14 |    4554544 | 2014-09-09 |
+|        7 |    4554544 | 2014-09-09 |
+|        8 |    4554544 | 2014-09-09 |
+|        9 |    4554544 | 2014-09-09 |
+|       10 |    4554544 | 2014-09-09 |
+|       11 |    4554544 | 2014-09-09 |
+|       12 |    4554544 | 2014-09-09 |
+|       13 |    4554544 | 2014-09-09 |
+|       25 |    4554544 | 2014-09-09 |
+|       26 |    3443222 | 2014-08-09 |
++----------+------------+------------+
+10 rows in set (0.00 sec)
+
+mysql>
